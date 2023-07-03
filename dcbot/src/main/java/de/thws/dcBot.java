@@ -77,6 +77,7 @@ public class dcBot{
                         .addChoice("Shinymix", "D:/sharksd/models/diffusers/shinymixbakedvae")
                         .addChoice("AOM3_orangemixs","D:/customsharksd/SHARK/apps/stable_diffusion/web/models/diffusers/OrangemixsBakedVaev1")
                         .addChoice("MeinaPastel_v6","D:/customsharksd/SHARK/apps/stable_diffusion/web/models/diffusers/meinapastel_v6Pastel")
+                        .addChoice("Midjorney", "prompthero/openjourney")
                     )
                 .addOptions(
                     new OptionData(OptionType.STRING, "upscale", "Should the generated image be upscaled? This feature is currently only available for 768x512 Images!")

@@ -35,7 +35,7 @@ public class dcNodaiTxt2img extends ListenerAdapter {
 
     //Default settings here
     String[] defaults = {
-        "Lykon/DreamShaper", //model huggingface id
+        "prompthero/openjourney", //model huggingface id
         "768x512",   //image pixels, heightxwidth
         "30",   //default iterations
         "no",   //upscaling
@@ -46,7 +46,9 @@ public class dcNodaiTxt2img extends ListenerAdapter {
         "D:/customsharksd/SHARK/apps/stable_diffusion/web/models/diffusers/meinapastel_v6Pastel",
         "D:/customsharksd/SHARK/apps/stable_diffusion/web/models/diffusers/naiplswork", 
         "D:/customsharksd/SHARK/apps/stable_diffusion/web/models/diffusers/OrangemixsBakedVaev1",
-        "D:/customsharksd/SHARK/apps/stable_diffusion/web/models/diffusers/shinymixbakedvae"
+        "D:/customsharksd/SHARK/apps/stable_diffusion/web/models/diffusers/shinymixbakedvae",
+        "Lykon/DreamShaper",
+        "prompthero/openjourney"
     };
 
     public void sendHelp(EmbedBuilder eb, SlashCommandInteractionEvent event){
@@ -115,8 +117,8 @@ public class dcNodaiTxt2img extends ListenerAdapter {
                 int cHeight = Integer.parseInt(splitSize[0]);
                 int cWidth = Integer.parseInt(splitSize[1]);
 
-                String defaultPrompt = "decorated,ultra detailed,masterpiece,high quality,4k,8k,";
-
+                //String defaultPrompt = "decorated,ultra detailed,masterpiece,high quality,4k,8k,";
+                String defaultPrompt = "";
                 String cPrompt = defaultPrompt+aPrompt;
 
                 if(
@@ -124,7 +126,8 @@ public class dcNodaiTxt2img extends ListenerAdapter {
                     model.equals(keywordsmodel[1])||
                     model.equals(keywordsmodel[2])||
                     model.equals(keywordsmodel[3])||
-                    model.equals(keywordsmodel[4]))&&
+                    model.equals(keywordsmodel[4])||
+                    model.equals(keywordsmodel[5]))&&
                     (cHeight == 512 || cHeight == 768)&&
                     (cWidth == 512 || cWidth == 768)&&
                     (cHeight+cWidth == 1024)||
@@ -137,6 +140,8 @@ public class dcNodaiTxt2img extends ListenerAdapter {
 
                 String Neg = "worst quality, low quality, multiple views, multiple legs, missing arms, missing legs, multiple panels, blurry, watermark, letterbox, text, bad anatomy,bad finger,bad hand,bad eyes,over 5 finger, wrong hand,long finger";
                 
+                cPrompt = cPrompt.replace("ä","ae").replace("ü","ue").replace("ä","oe");
+
                 String prompt = "\"prompt\": \""+cPrompt+"\",";
                 String negative_prompt = "\"negative_prompt\": \""+Neg+"\",";
                 String steps = "\"steps\": "+iter+",";
