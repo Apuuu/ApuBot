@@ -1,5 +1,8 @@
 package de.thws;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+
 import de.thws.cmds.commands;
 import de.thws.cmds.enhancementsim;
 import de.thws.cmds.msgs;
@@ -17,7 +20,20 @@ public class dcBot{
 
     public static void main(String[] args){
 
-        JDA bot = JDABuilder.createDefault("ODM1MTc4Mjg3MzQ0NjQ4MjIy.Gt_63Y.qqxZ6SDIdyiXWQ-6PFSWp5lVY1k6HtbS8dPBMI")
+        String tokenPath = "C:/Users/maxim/Desktop/token.txt";
+
+        try(BufferedReader br = new BufferedReader(new FileReader(tokenPath))){
+        
+        String line;
+        StringBuilder content = new StringBuilder();
+
+        while ((line = br.readLine()) != null) {
+            content.append(line).append("");
+        }
+
+        String token = content.toString();
+        
+        JDA bot = JDABuilder.createDefault(token)
             .enableIntents(GatewayIntent.MESSAGE_CONTENT)
             .addEventListeners(new commands())
             .addEventListeners(new msgs())
@@ -85,5 +101,8 @@ public class dcBot{
                 .addOption(OptionType.STRING, "path", "Imagepath")
         ).queue();
         
-    }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }    
 }
