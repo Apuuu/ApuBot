@@ -101,7 +101,7 @@ public class dcNodaiUpscaler extends ListenerAdapter {
             String steps = "\"steps\": "+10+",";
             String noise_level = "\"noise_level\": "+5+",";
             String hf_model_id = "\"hf_model_id\": \""+model+"\",";
-            String scheduler = "\"sampler\": \"EulerDiscrete\"";
+            String scheduler = "\"sampler\": \"EulerAncestralDiscrete\"";
 
             String finalPayload = "{"+prompt+negative_prompt+seed+height+width+cfg_scale+init_imagesjson+steps+noise_level+hf_model_id+scheduler+"}";
 
