@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.io.File;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -101,11 +102,11 @@ public class dcNodaiTxt2img extends ListenerAdapter {
                 String model, size, aPrompt, upscale;
                 int iter, schedulerID;
 
-                if(event.getOption("model") == null){model = defaults[0];}else{model = event.getOption("model").getAsString();}
-                if(event.getOption("size") == null){size = defaults[1];}else{size = event.getOption("size").getAsString();}
-                if(event.getOption("iter") == null){iter = Integer.parseInt(defaults[2]);}else{iter = event.getOption("iter").getAsInt();if(iter>60){iter = 60;}}
-                if(event.getOption("upscale") == null){upscale = defaults[3];}else{upscale = event.getOption("upscale").getAsString();}
-                if(event.getOption("scheduler") == null){schedulerID = Integer.parseInt(defaults[4]);}else{schedulerID = event.getOption("scheduler").getAsInt();}
+                model = event.getOption("model") == null ? defaults[0] : event.getOption("model").getAsString();
+                size = event.getOption("size") == null ? defaults[1] : event.getOption("size").getAsString();
+                iter = event.getOption("iter") == null ? Integer.parseInt(defaults[2]) : Math.max(0, Math.min(60, event.getOption("iter").getAsInt()));
+                upscale = event.getOption("upscale") == null ? defaults[3] : event.getOption("upscale").getAsString();
+                schedulerID = event.getOption("scheduler") == null ? Integer.parseInt(defaults[4]) : event.getOption("scheduler").getAsInt();
 
                 if(event.getOption("danid") != null){
                     aPrompt = dcDanbooruAPI.getDanbooruTags(event.getOption("danid").getAsInt());
@@ -122,12 +123,7 @@ public class dcNodaiTxt2img extends ListenerAdapter {
                 String cPrompt = defaultPrompt+aPrompt;
 
                 if(
-                    (model.equals(keywordsmodel[0])||
-                    model.equals(keywordsmodel[1])||
-                    model.equals(keywordsmodel[2])||
-                    model.equals(keywordsmodel[3])||
-                    model.equals(keywordsmodel[4])||
-                    model.equals(keywordsmodel[5]))&&
+                    (Arrays.asList(keywordsmodel).contains(model))&&
                     (cHeight == 512 || cHeight == 768)&&
                     (cWidth == 512 || cWidth == 768)&&
                     (cHeight+cWidth == 1024)||

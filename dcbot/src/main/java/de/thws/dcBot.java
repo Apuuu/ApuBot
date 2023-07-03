@@ -47,7 +47,6 @@ public class dcBot{
             Commands.slash("dantags","Get Danbooru image Tags")
                 .addOption(OptionType.INTEGER, "id", "Image ID"),
             Commands.slash("functions", "Print all functions"),
-            //Commands.slash("randommsg","Get a random message from past n messages"),
             Commands.slash("enhance","Simulate an enhancement")
                 .addOption(OptionType.STRING, "item", "Boss, Acc, Blackstar", true)
                 .addOption(OptionType.INTEGER, "enhancementlevel","1 (PRI) - 5 (PEN)", true)
