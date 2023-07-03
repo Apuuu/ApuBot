@@ -98,10 +98,10 @@ public class dcNodaiUpscaler extends ListenerAdapter {
             String width = "\"width\": "+768+",";
             String cfg_scale = "\"cfg_scale\": 7.5,";
             String init_imagesjson = "\"init_images\": [\""+base64Data[0]+"\"],";
-            String steps = "\"steps\": "+10+",";
-            String noise_level = "\"noise_level\": "+5+",";
+            String steps = "\"steps\": "+20+",";
+            String noise_level = "\"noise_level\": "+20+",";
             String hf_model_id = "\"hf_model_id\": \""+model+"\",";
-            String scheduler = "\"sampler\": \"EulerAncestralDiscrete\"";
+            String scheduler = "\"sampler\": \"EulerDiscrete\"";
 
             String finalPayload = "{"+prompt+negative_prompt+seed+height+width+cfg_scale+init_imagesjson+steps+noise_level+hf_model_id+scheduler+"}";
 
