@@ -8,6 +8,7 @@ import de.thws.cmds.enhancementsim;
 import de.thws.cmds.msgs;
 import de.thws.cmds.dcNod.dcNodaiTxt2img;
 import de.thws.cmds.dcNod.dcNodaiUpscaler;
+import de.thws.cmds.dcNod.dcNodaiconfig;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -19,21 +20,8 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 public class dcBot{
 
     public static void main(String[] args){
-
-        String tokenPath = "C:/Users/maxim/Desktop/token.txt";
-
-        try(BufferedReader br = new BufferedReader(new FileReader(tokenPath))){
         
-        String line;
-        StringBuilder content = new StringBuilder();
-
-        while ((line = br.readLine()) != null) {
-            content.append(line).append("");
-        }
-
-        String token = content.toString();
-        
-        JDA bot = JDABuilder.createDefault(token)
+        JDA bot = JDABuilder.createDefault(dcNodaiconfig.token)
             .enableIntents(GatewayIntent.MESSAGE_CONTENT)
             .addEventListeners(new commands())
             .addEventListeners(new msgs())
@@ -73,7 +61,7 @@ public class dcBot{
                         .addChoice("DreamShaper","Lykon/DreamShaper")
                         .addChoice("animePastelDream_hardBakedVae","D:/sharksd/models/diffusers/animePastelDream_hardBakedVae")
                         .addChoice("NovelAI", "D:/customsharksd/SHARK/apps/stable_diffusion/web/models/diffusers/naiplswork")
-                        .addChoice("Shinymix", "D:/sharksd/models/diffusers/shinymixbakedvae")
+                        .addChoice("Shinymix", "D:/customsharksd/SHARK/apps/stable_diffusion/web/models/diffusers/shinymixbakedvae")
                         .addChoice("AOM3_orangemixs","D:/customsharksd/SHARK/apps/stable_diffusion/web/models/diffusers/OrangemixsBakedVaev1")
                         .addChoice("MeinaPastel_v6","D:/customsharksd/SHARK/apps/stable_diffusion/web/models/diffusers/meinapastel_v6Pastel")
                         .addChoice("Midjorney", "prompthero/openjourney")
@@ -100,9 +88,5 @@ public class dcBot{
                 .addOption(OptionType.STRING, "seed", "Image seed")
                 .addOption(OptionType.STRING, "path", "Imagepath")
         ).queue();
-        
-        }catch(Exception e){
-            e.printStackTrace();
-        }
     }    
 }

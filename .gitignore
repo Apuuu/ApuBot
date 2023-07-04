@@ -1,4 +1,5 @@
 dcbot/target
 dcbot/pom.xml
+dcbot/src/main/java/de/thws/cmds/dcNod/dcNodaiconfig.java
 .idea
 .git

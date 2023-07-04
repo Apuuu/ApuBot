@@ -1,6 +1,5 @@
 package de.thws.cmds.dcNod;
 
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -22,35 +21,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class dcNodaiTxt2img extends ListenerAdapter {
-
-    String[] scheduler_list_cpu_only = {
-        "DDIM",
-        "PNDM",
-        "LMSDiscrete",
-        "KDPM2Discrete",
-        "DPMSolverMultistep",
-        "EulerDiscrete",
-        "EulerAncestralDiscrete",
-        "SharkEulerDiscrete"
-    };
-
-    //Default settings here
-    String[] defaults = {
-        "prompthero/openjourney", //model huggingface id
-        "768x512",   //image pixels, heightxwidth
-        "30",   //default iterations
-        "no",   //upscaling
-        "0" //scheduler
-    };
-
-    String[] keywordsmodel = {"D:/sharksd/models/diffusers/animePastelDream_hardBakedVae",
-        "D:/customsharksd/SHARK/apps/stable_diffusion/web/models/diffusers/meinapastel_v6Pastel",
-        "D:/customsharksd/SHARK/apps/stable_diffusion/web/models/diffusers/naiplswork", 
-        "D:/customsharksd/SHARK/apps/stable_diffusion/web/models/diffusers/OrangemixsBakedVaev1",
-        "D:/customsharksd/SHARK/apps/stable_diffusion/web/models/diffusers/shinymixbakedvae",
-        "Lykon/DreamShaper",
-        "prompthero/openjourney"
-    };
 
     public void sendHelp(EmbedBuilder eb, SlashCommandInteractionEvent event){
         eb.setTitle("Nod.Ai usage", null);
@@ -79,7 +49,11 @@ public class dcNodaiTxt2img extends ListenerAdapter {
         }catch(Exception e){
             eb3.addField("Server name: ","Direct Message", false);
         }
-        eb3.addField("Json request: ", Message, false);
+        if(Message.length()>1023){
+            eb3.addField("","Too long!", false);
+        }else{
+            eb3.addField("Json request: ", Message, false);
+        }
         txtChannel.sendMessageEmbeds(eb3.build()).queue();
         eb3.clear();
     }
@@ -102,11 +76,11 @@ public class dcNodaiTxt2img extends ListenerAdapter {
                 String model, size, aPrompt, upscale;
                 int iter, schedulerID;
 
-                model = event.getOption("model") == null ? defaults[0] : event.getOption("model").getAsString();
-                size = event.getOption("size") == null ? defaults[1] : event.getOption("size").getAsString();
-                iter = event.getOption("iter") == null ? Integer.parseInt(defaults[2]) : Math.max(0, Math.min(60, event.getOption("iter").getAsInt()));
-                upscale = event.getOption("upscale") == null ? defaults[3] : event.getOption("upscale").getAsString();
-                schedulerID = event.getOption("scheduler") == null ? Integer.parseInt(defaults[4]) : event.getOption("scheduler").getAsInt();
+                model = event.getOption("model") == null ? dcNodaiconfig.defaults[0] : event.getOption("model").getAsString();
+                size = event.getOption("size") == null ? dcNodaiconfig.defaults[1] : event.getOption("size").getAsString();
+                iter = event.getOption("iter") == null ? Integer.parseInt(dcNodaiconfig.defaults[2]) : Math.max(0, Math.min(60, event.getOption("iter").getAsInt()));
+                upscale = event.getOption("upscale") == null ? dcNodaiconfig.defaults[3] : event.getOption("upscale").getAsString();
+                schedulerID = event.getOption("scheduler") == null ? Integer.parseInt(dcNodaiconfig.defaults[4]) : event.getOption("scheduler").getAsInt();
 
                 if(event.getOption("danid") != null){
                     aPrompt = dcDanbooruAPI.getDanbooruTags(event.getOption("danid").getAsInt());
@@ -118,44 +92,28 @@ public class dcNodaiTxt2img extends ListenerAdapter {
                 int cHeight = Integer.parseInt(splitSize[0]);
                 int cWidth = Integer.parseInt(splitSize[1]);
 
-                //String defaultPrompt = "decorated,ultra detailed,masterpiece,high quality,4k,8k,";
-                String defaultPrompt = "";
-                String cPrompt = defaultPrompt+aPrompt;
-
-                if(
-                    (Arrays.asList(keywordsmodel).contains(model))&&
-                    (cHeight == 512 || cHeight == 768)&&
-                    (cWidth == 512 || cWidth == 768)&&
-                    (cHeight+cWidth == 1024)||
-                    (cHeight+cWidth == 1280)
-                ){
+                if(Arrays.asList(dcNodaiconfig.keywordsmodel).contains(model)){
 
                 event.reply("Image is being Generated...").queue();
 
-                String url = "http://127.0.0.1:8080/";
-
-                String Neg = "worst quality, low quality, multiple views, multiple legs, missing arms, missing legs, multiple panels, blurry, watermark, letterbox, text, bad anatomy,bad finger,bad hand,bad eyes,over 5 finger, wrong hand,long finger";
-                
+                String cPrompt = dcNodaiconfig.defaultPrompt+aPrompt;
                 cPrompt = cPrompt.replace("ä","ae").replace("ü","ue").replace("ä","oe");
 
                 String prompt = "\"prompt\": \""+cPrompt+"\",";
-                String negative_prompt = "\"negative_prompt\": \""+Neg+"\",";
+                String negative_prompt = "\"negative_prompt\": \""+dcNodaiconfig.defaultNegativePrompt+"\",";
                 String steps = "\"steps\": "+iter+",";
                 String seed = "\"seed\": -1,";
                 String height = "\"height\": "+cHeight+",";
                 String width = "\"width\": "+cWidth+",";
                 String cfg_scale = "\"cfg_scale\": 8.5,";
                 String hf_model_id = "\"hf_model_id\": \""+model+"\",";
-                String scheduler = "\"sampler\": \""+scheduler_list_cpu_only[schedulerID]+"\"";
-
+                String scheduler = "\"sampler\": \""+dcNodaiconfig.scheduler_list_cpu_only[schedulerID]+"\"";
                 String finalPayload = "{"+prompt+negative_prompt+steps+seed+height+width+cfg_scale+hf_model_id+scheduler+"}";
                 
                 sendToLogger(event, event.getUser().getEffectiveName(), finalPayload, eb3);
 
                 try{
-                    String urlwhole = url+"sdapi/v1/txt2img";
-                    URL endpointUrl = new URL(urlwhole);
-
+                    URL endpointUrl = new URL(dcNodaiconfig.txt2imgUrl);
                     HttpURLConnection connection = (HttpURLConnection) endpointUrl.openConnection();
 
                     connection.setRequestMethod("POST");
@@ -251,7 +209,7 @@ public class dcNodaiTxt2img extends ListenerAdapter {
 
                                     }
                                 } else if (listOfFiles[i].isDirectory()) {
-                                    System.out.println("Directory " + listOfFiles[i].getName());
+                                    //System.out.println("Directory " + listOfFiles[i].getName());
                                 }
                             }
 
