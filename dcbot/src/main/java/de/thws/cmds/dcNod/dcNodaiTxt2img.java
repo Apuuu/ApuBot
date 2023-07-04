@@ -42,7 +42,7 @@ public class dcNodaiTxt2img extends ListenerAdapter {
                                 String jsonResponse = getJsonResponse(connection);
 
                                 ObjectMapper objectMapper = new ObjectMapper();
-                                JsonNode jsonNode = objectMapper.readTree(jsonResponse.toString());
+                                JsonNode jsonNode = objectMapper.readTree(jsonResponse);
 
                                 if (jsonNode.has("info") && jsonNode.get("info").isTextual()) {
 
@@ -195,9 +195,10 @@ public class dcNodaiTxt2img extends ListenerAdapter {
         int iter = event.getOption("iter") == null ? Integer.parseInt(dcNodaiconfig.defaults[2]) : Math.max(0, Math.min(60, event.getOption("iter").getAsInt()));
         int schedulerID = event.getOption("scheduler") == null ? Integer.parseInt(dcNodaiconfig.defaults[4]) : event.getOption("scheduler").getAsInt();
         String lora = event.getOption("lora") == null ? dcNodaiconfig.defaults[5] : event.getOption("lora").getAsString();
+        double cfgscale = event.getOption("cfgscale") == null ? Double.parseDouble(dcNodaiconfig.defaults[6]) : Double.parseDouble(event.getOption("cfgscale").getAsString());
 
         String cPrompt = dcNodaiconfig.defaultPrompt + aPrompt;
-        cPrompt = cPrompt.replace("ä", "ae").replace("ü", "ue").replace("ä", "oe");
+        cPrompt = replaceSpecialCharacters(cPrompt);
 
         String[] splitSize = size.split("x", 2);
         int cHeight = Integer.parseInt(splitSize[0]);
@@ -209,11 +210,20 @@ public class dcNodaiTxt2img extends ListenerAdapter {
         String seed = "\"seed\": -1,";
         String height = "\"height\": " + cHeight + ",";
         String width = "\"width\": " + cWidth + ",";
-        String cfg_scale = "\"cfg_scale\": 11,";
+        String cfg_scale = "\"cfg_scale\":" + cfgscale + ",";
         String hf_model_id = "\"hf_model_id\": \"" + model + "\",";
         String scheduler = "\"sampler\": \"" + dcNodaiconfig.scheduler_list_cpu_only[schedulerID] + "\",";
         String custom_lora_file = "\"custom_lora\": \"" + lora + "\"";
         String finalPayload = "{" + prompt + negative_prompt + steps + seed + height + width + cfg_scale + hf_model_id + scheduler + custom_lora_file + "}";
         return finalPayload;
+    }
+
+    @NotNull
+    private static String replaceSpecialCharacters(String cPrompt) {
+        cPrompt = cPrompt
+                .replace("ä", "ae")
+                .replace("ü", "ue")
+                .replace("ä", "oe");
+        return cPrompt;
     }
 }
