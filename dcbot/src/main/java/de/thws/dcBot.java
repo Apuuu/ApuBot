@@ -1,8 +1,5 @@
 package de.thws;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-
 import de.thws.cmds.commands;
 import de.thws.cmds.enhancementsim;
 import de.thws.cmds.msgs;

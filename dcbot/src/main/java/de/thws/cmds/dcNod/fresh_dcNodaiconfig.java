@@ -1,9 +1,9 @@
 package de.thws.cmds.dcNod;
 
-public class dcNodaiconfig {
-
+public class fresh_dcNodaiconfig {
+                //^ this is the class btw
     /*!!!!!!!!!!!!
-    //BEFORE USING THIS BOT, MAKE SURE TO CHANGE THIS FILES NAME TO "dcNodaiconfig" AND ADD YOUR DISCORD TOKEN
+    //BEFORE USING THIS BOT, MAKE SURE TO CHANGE THIS FILES NAME AND CLASS TO "dcNodaiconfig" AND ADD YOUR DISCORD TOKEN
     *!!!!!!!!!!!!!
     */
 
