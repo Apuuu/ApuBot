@@ -3,7 +3,7 @@ package de.thws.cmds.dcNod;
 public class fresh_dcNodaiconfig {
                 //^ this is the class btw
     /*!!!!!!!!!!!!
-    //BEFORE USING THIS BOT, MAKE SURE TO CHANGE THIS FILES NAME AND CLASS TO "dcNodaiconfig" AND ADD YOUR DISCORD TOKEN
+    //BEFORE USING THIS BOT, MAKE SURE TO CHANGE THIS FILES NAME TO "dcNodaiconfig"
     *!!!!!!!!!!!!!
     */
 
@@ -25,7 +25,8 @@ public class fresh_dcNodaiconfig {
         "768x512",   //image pixels, heightxwidth
         "30",   //default iterations
         "no",   //upscaling
-        "0" //scheduler
+        "0", //scheduler
+        "" //lora
     };
 
     /*List of all your converted models into diffuser. You can also just simply add a huggingface repo!
@@ -40,9 +41,16 @@ public class fresh_dcNodaiconfig {
         "prompthero/openjourney"
     };
 
+
+    //List of all your lora models
+    public static String[] keywordslora = {
+        "D:/customsharksd/SHARK/apps/stable_diffusion/web/models/lora/niceeyes.safetensors",
+        "D:/customsharksd/SHARK/apps/stable_diffusion/web/models/lora/kdllorav15.safetensors"
+    };
+
     //This string will be added to the custom prompt
     //String defaultPrompt = "decorated,ultra detailed,masterpiece,high quality,4k,8k,";
-    static String defaultPrompt = "decorated, (((masterpiece))),(((best quality))),(((extremely detailed))),(((fine details))),illustration,";
+    static String defaultPrompt = "decorated, high quality, (((masterpiece))),(((best quality))),(((extremely detailed))),(((fine details))),illustration,";
 
     //This string will be added to the custom negative prompt
     static String defaultNegativePrompt = "(((worst quality))), (((low quality))), multiple views, (((multiple legs))), (((missing arms))), missing legs, multiple panels, (((blurry, watermark))), letterbox, text, bad anatomy,(((bad finger))),bad hand,bad eyes,over 5 finger, wrong hand,long finger";
