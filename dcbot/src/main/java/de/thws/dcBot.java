@@ -79,6 +79,11 @@ public class dcBot{
                         .addChoice("EulerAncestralDiscrete",6)
                         .addChoice("SharkEulerDiscrete",7)
                     )
+                .addOptions(
+                    new OptionData(OptionType.STRING, "lora", "Select a available lora")
+                        .addChoice("Beautiful eyes",dcNodaiconfig.keywordslora[0])
+                        .addChoice("Korean Doll like",dcNodaiconfig.keywordslora[1])
+                    )
                 .addOption(OptionType.STRING, "prompt", "custom prompt")
                 .addOption(OptionType.INTEGER, "danid", "Use Danbooru tag from ID")
                 .addOption(OptionType.INTEGER, "iter", "Amount of steps")

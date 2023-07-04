@@ -1,9 +1,6 @@
 package de.thws.cmds.dcNod;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -14,7 +11,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
 import java.io.File;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -37,7 +33,7 @@ public class dcNodaiTxt2img extends ListenerAdapter {
 
                 case "default":
 
-                String model, size, aPrompt, upscale;
+                String model, size, aPrompt, upscale, lora;
                 int iter, schedulerID;
 
                 model = event.getOption("model") == null ? dcNodaiconfig.defaults[0] : event.getOption("model").getAsString();
@@ -45,6 +41,7 @@ public class dcNodaiTxt2img extends ListenerAdapter {
                 iter = event.getOption("iter") == null ? Integer.parseInt(dcNodaiconfig.defaults[2]) : Math.max(0, Math.min(60, event.getOption("iter").getAsInt()));
                 upscale = event.getOption("upscale") == null ? dcNodaiconfig.defaults[3] : event.getOption("upscale").getAsString();
                 schedulerID = event.getOption("scheduler") == null ? Integer.parseInt(dcNodaiconfig.defaults[4]) : event.getOption("scheduler").getAsInt();
+                lora = event.getOption("lora") == null ? dcNodaiconfig.defaults[5] : event.getOption("lora").getAsString();
 
                 if(event.getOption("danid") != null){
                     aPrompt = dcDanbooruAPI.getDanbooruTags(event.getOption("danid").getAsInt());
@@ -55,8 +52,6 @@ public class dcNodaiTxt2img extends ListenerAdapter {
                 String[] splitSize = size.split("x",2);
                 int cHeight = Integer.parseInt(splitSize[0]);
                 int cWidth = Integer.parseInt(splitSize[1]);
-
-                if(Arrays.asList(dcNodaiconfig.keywordsmodel).contains(model)){
 
                 event.reply("Image is being Generated...").queue();
 
@@ -69,10 +64,11 @@ public class dcNodaiTxt2img extends ListenerAdapter {
                 String seed = "\"seed\": -1,";
                 String height = "\"height\": "+cHeight+",";
                 String width = "\"width\": "+cWidth+",";
-                String cfg_scale = "\"cfg_scale\": 8.5,";
+                String cfg_scale = "\"cfg_scale\": 11,";
                 String hf_model_id = "\"hf_model_id\": \""+model+"\",";
-                String scheduler = "\"sampler\": \""+dcNodaiconfig.scheduler_list_cpu_only[schedulerID]+"\"";
-                String finalPayload = "{"+prompt+negative_prompt+steps+seed+height+width+cfg_scale+hf_model_id+scheduler+"}";
+                String scheduler = "\"sampler\": \""+dcNodaiconfig.scheduler_list_cpu_only[schedulerID]+"\",";
+                String custom_lora_file = "\"custom_lora\": \""+lora+"\"";
+                String finalPayload = "{"+prompt+negative_prompt+steps+seed+height+width+cfg_scale+hf_model_id+scheduler+custom_lora_file+"}";
                 
                 dcNodaiMisc.sendToLogger(event, dcNodaiMisc.getUsername(event), finalPayload, eb3);
 
@@ -179,11 +175,6 @@ public class dcNodaiTxt2img extends ListenerAdapter {
 
                 }catch (Exception e){}
 
-                }else{
-                    //Will send the Usage Embed if any of the inputs are invalid
-                    dcNodaiMisc.sendUsage(eb3, event);
-                }
-                
                 break;
 
                 case "models":
