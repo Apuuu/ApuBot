@@ -27,92 +27,7 @@ public class dcNodaiTxt2img extends ListenerAdapter {
                 switch (mode) {
 
                     case "default":
-
-                        String finalPayload = getFinalPayload(event);
-
-                        dcNodaiMisc.sendToLogger(event, dcNodaiMisc.getUsername(event), finalPayload, eb3);
-
-                        try {
-                            event.reply("Image is being Generated...").queue();
-
-                            HttpURLConnection connection = sendRequestAndReceiveResponse(finalPayload);
-
-                            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-
-                                String jsonResponse = getJsonResponse(connection);
-
-                                ObjectMapper objectMapper = new ObjectMapper();
-                                JsonNode jsonNode = objectMapper.readTree(jsonResponse);
-
-                                if (jsonNode.has("info") && jsonNode.get("info").isTextual()) {
-
-                                    String info = jsonNode.get("info").asText();
-
-                                    String currentSeed = getSeed(info);
-
-                                    String[] splitInfo = info.split("ckpt_loc=", 2);
-
-                                    String finalDate = getFinalDate();
-
-                                    File folder = new File("D:/customsharksd/SHARK/apps/stable_diffusion/web/generated_imgs/" + finalDate);
-                                    File[] listOfFiles = folder.listFiles();
-
-                                    for (File listOfFile : listOfFiles) {
-                                        if (listOfFile.isFile() && listOfFile.toString().contains(currentSeed)) {
-
-                                            String FileName = "D:/customsharksd/SHARK/apps/stable_diffusion/web/generated_imgs/" + finalDate + "/" + listOfFile.getName();
-                                            String upscale = event.getOption("upscale") == null ? dcNodaiconfig.defaults[3] : event.getOption("upscale").getAsString();
-
-                                            switch (upscale) {
-                                                case "no":
-                                                    FileUpload aiImage = FileUpload.fromData(new File(FileName));
-                                                    eb3.setTitle("Image informations:", null);
-                                                    if (splitInfo[0].length() > 1023) {
-                                                        eb3.addField("", "Too long!", false);
-                                                    } else {
-                                                        eb3.addField("", splitInfo[0], false);
-                                                    }
-                                                    eb3.addField("", splitInfo[1], false);
-                                                    eb3.addField("Upscaling", "If you want to upscale the generated image please use /gen mode:Upscale path:" + finalDate + "/" + listOfFile.getName() + " seed:" + currentSeed + "", false);
-                                                    event.getChannel().sendMessageEmbeds(eb3.build()).queue();
-                                                    eb3.clear();
-                                                    event.getChannel().sendFiles(aiImage).queue();
-                                                    break;
-                                                case "yes":
-
-                                                    event.getChannel().sendMessage("Image generated! Now upscaling...").queue();
-                                                    dcNodaiUpscaler.nodaiUpscale(FileName, currentSeed);
-                                                    File[] newlistOfFiles = folder.listFiles();
-
-                                                    for (File newlistOfFile : newlistOfFiles) {
-                                                        if (newlistOfFile.toString().contains("upscale") && newlistOfFile.toString().contains(currentSeed)) {
-                                                            FileName = "D:/customsharksd/SHARK/apps/stable_diffusion/web/generated_imgs/" + finalDate + "/" + newlistOfFile.getName();
-                                                            FileUpload aiImageUpscaled = FileUpload.fromData(new File(FileName));
-                                                            eb3.setTitle("Image informations:", null);
-                                                            if (splitInfo[0].length() > 1023) {
-                                                                eb3.addField("", "Too long!", false);
-                                                            } else {
-                                                                eb3.addField("", splitInfo[0], false);
-                                                            }
-                                                            eb3.addField("", splitInfo[1], false);
-                                                            event.getChannel().sendMessageEmbeds(eb3.build()).queue();
-                                                            eb3.clear();
-                                                            event.getChannel().sendFiles(aiImageUpscaled).queue();
-                                                        }
-                                                    }
-                                                    break;
-                                            }
-                                        }
-
-                                    }
-                                }
-                            }
-
-                            connection.disconnect();
-
-                        } catch (Exception e) {
-                        }
-
+                        requestImage(event, eb3);
                         break;
 
                     case "models":
@@ -125,6 +40,93 @@ public class dcNodaiTxt2img extends ListenerAdapter {
                 }
                 break;
 
+        }
+    }
+
+    private static void requestImage(SlashCommandInteractionEvent event, EmbedBuilder eb3) {
+        String finalPayload = getFinalPayload(event);
+
+        dcNodaiMisc.sendToLogger(event, dcNodaiMisc.getUsername(event), finalPayload, eb3);
+
+        try {
+            event.reply("Image is being Generated...").queue();
+
+            HttpURLConnection connection = sendRequestAndReceiveResponse(finalPayload);
+
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+
+                String jsonResponse = getJsonResponse(connection);
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonNode = objectMapper.readTree(jsonResponse);
+
+                if (jsonNode.has("info") && jsonNode.get("info").isTextual()) {
+
+                    String info = jsonNode.get("info").asText();
+
+                    String currentSeed = getSeed(info);
+
+                    String[] splitInfo = info.split("ckpt_loc=", 2);
+
+                    String finalDate = getFinalDate();
+
+                    File folder = new File("D:/customsharksd/SHARK/apps/stable_diffusion/web/generated_imgs/" + finalDate);
+                    File[] listOfFiles = folder.listFiles();
+
+                    for (File listOfFile : listOfFiles) {
+                        if (listOfFile.isFile() && listOfFile.toString().contains(currentSeed)) {
+
+                            String FileName = "D:/customsharksd/SHARK/apps/stable_diffusion/web/generated_imgs/" + finalDate + "/" + listOfFile.getName();
+                            String upscale = event.getOption("upscale") == null ? dcNodaiconfig.defaults[3] : event.getOption("upscale").getAsString();
+
+                            switch (upscale) {
+                                case "no":
+                                    FileUpload aiImage = FileUpload.fromData(new File(FileName));
+                                    eb3.setTitle("Image informations:", null);
+                                    if (splitInfo[0].length() > 1023) {
+                                        eb3.addField("", "Too long!", false);
+                                    } else {
+                                        eb3.addField("", splitInfo[0], false);
+                                    }
+                                    eb3.addField("", splitInfo[1], false);
+                                    eb3.addField("Upscaling", "If you want to upscale the generated image please use /gen mode:Upscale path:" + finalDate + "/" + listOfFile.getName() + " seed:" + currentSeed + "", false);
+                                    event.getChannel().sendMessageEmbeds(eb3.build()).queue();
+                                    eb3.clear();
+                                    event.getChannel().sendFiles(aiImage).queue();
+                                    break;
+                                case "yes":
+
+                                    event.getChannel().sendMessage("Image generated! Now upscaling...").queue();
+                                    dcNodaiUpscaler.nodaiUpscale(FileName, currentSeed);
+                                    File[] newlistOfFiles = folder.listFiles();
+
+                                    for (File newlistOfFile : newlistOfFiles) {
+                                        if (newlistOfFile.toString().contains("upscale") && newlistOfFile.toString().contains(currentSeed)) {
+                                            FileName = "D:/customsharksd/SHARK/apps/stable_diffusion/web/generated_imgs/" + finalDate + "/" + newlistOfFile.getName();
+                                            FileUpload aiImageUpscaled = FileUpload.fromData(new File(FileName));
+                                            eb3.setTitle("Image informations:", null);
+                                            if (splitInfo[0].length() > 1023) {
+                                                eb3.addField("", "Too long!", false);
+                                            } else {
+                                                eb3.addField("", splitInfo[0], false);
+                                            }
+                                            eb3.addField("", splitInfo[1], false);
+                                            event.getChannel().sendMessageEmbeds(eb3.build()).queue();
+                                            eb3.clear();
+                                            event.getChannel().sendFiles(aiImageUpscaled).queue();
+                                        }
+                                    }
+                                    break;
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            connection.disconnect();
+
+        } catch (Exception e) {
         }
     }
 

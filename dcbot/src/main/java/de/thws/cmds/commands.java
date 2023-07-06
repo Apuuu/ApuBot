@@ -1,5 +1,6 @@
 package de.thws.cmds;
 
+import de.thws.cmds.dcNod.dcDanbooruAPI;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -7,34 +8,32 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.thws.cmds.dcNod.dcDanbooruAPI;
-
 public class commands extends ListenerAdapter {
 
     static List<String> data = new ArrayList<String>();
 
     @Override
-    public void onSlashCommandInteraction(SlashCommandInteractionEvent event){
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 
-        String[] smelly = {"Vomit","a skunk","Sewage","Rotten Eggs", "Shit", "a Corpse", "a Dumpster", "Garbage", "a Fart", "unwashed Socks"};
+        String[] smelly = {"Vomit", "a skunk", "Sewage", "Rotten Eggs", "Shit", "a Corpse", "a Dumpster", "Garbage", "a Fart", "unwashed Socks"};
         EmbedBuilder eb2 = new EmbedBuilder();
         Integer num;
         String userId;
 
-        switch(event.getName()){
+        switch (event.getName()) {
             case "stinky":
                 userId = event.getMember().getId();
-                num = (int)(Math.random()*10);
-                event.reply("<@"+userId+"> smells like "+smelly[num]).queue();
-            break;
+                num = (int) (Math.random() * 10);
+                event.reply("<@" + userId + "> smells like " + smelly[num]).queue();
+                break;
             case "redks":
-            userId = event.getMember().getId();
-            if(userId.equals("300595008229212161")){
-                event.reply("https://cdn.discordapp.com/attachments/887409385729568788/1122639339210428526/image.png").queue();
-            }else{
-                event.reply("Sorry you dont have the permissions to execute this command.").queue();
-            }   
-            break;
+                userId = event.getMember().getId();
+                if (userId.equals("300595008229212161")) {
+                    event.reply("https://cdn.discordapp.com/attachments/887409385729568788/1122639339210428526/image.png").queue();
+                } else {
+                    event.reply("Sorry you dont have the permissions to execute this command.").queue();
+                }
+                break;
             case "functions":
                 eb2.setTitle("ApuBot", null);
                 eb2.setDescription("You are able to use the following commands:");
@@ -47,48 +46,39 @@ public class commands extends ListenerAdapter {
                 eb2.setThumbnail("https://cdn.discordapp.com/emojis/1112393085016608779.webp?size=96&quality=lossless");
                 event.replyEmbeds(eb2.build()).queue();
                 eb2.clear();
-            break;
+                break;
             case "randommsg":
                 event.reply("Please just use /randommessage as a non Slash command.").queue();
-            break;
-            case "models":
-                eb2.setTitle("Nod.Ai models", null);
-                eb2.setDescription("Use one of the following models!");
-                eb2.addField("sinkinai/anime-pastel-dream-hard-baked-vae", "", false);
-                eb2.addField("Lykon/DreamShaper", "", false);
-                eb2.setThumbnail("https://nod.ai/wp-content/uploads/2020/06/Nod-Logo-1-16-400x100-1-300x105.png");
-                event.replyEmbeds(eb2.build()).queue();
-                eb2.clear();
-            break;
+                break;
             case "badword":
                 String option = event.getOption("action").getAsString();
 
-                switch(option.toLowerCase()){
+                switch (option.toLowerCase()) {
                     case "add":
                         String word = event.getOption("word").getAsString();
                         data.add(word);
                         event.reply("Bad word added!").queue();
-                    break;
+                        break;
 
                     case "remove":
                         event.reply("This function is not supported yet!").queue();
-                    break;
-                    
+                        break;
+
                     case "getlist":
-                        if(data.size()>0){
+                        if (data.size() > 0) {
                             event.reply(data.toString()).queue();
-                        }else{
+                        } else {
                             event.reply("I dont have any data to print!").queue();
                         }
-                    break;
+                        break;
 
                 }
-            break;
+                break;
             case "dantags":
                 event.reply(dcDanbooruAPI.getDanbooruTags(event.getOption("id").getAsInt())).queue();
-            break;
-            
+                break;
+
         }
     }
-    
+
 }
