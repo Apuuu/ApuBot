@@ -91,6 +91,7 @@ public class dcBot {
                         .addOption(OptionType.STRING, "seed", "Image seed")
                         .addOption(OptionType.STRING, "path", "Imagepath")
                         .addOption(OptionType.STRING, "cfgscale", "CFG guidance")
+                        .addOption(OptionType.STRING, "rdmdanid", "Random Danbooru prompts")
         ).queue();
     }
 }

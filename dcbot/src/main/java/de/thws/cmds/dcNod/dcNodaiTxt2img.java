@@ -31,74 +31,59 @@ public class dcNodaiTxt2img extends ListenerAdapter {
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode jsonNode = objectMapper.readTree(jsonResponse);
 
-                if (jsonNode.has("info") && jsonNode.get("info").isTextual()) {
+                String info = jsonNode.get("info").asText();
+                String imageData = getImageData(jsonNode);
 
-                    String info = jsonNode.get("info").asText();
+                String[] splitInfo = info.split("ckpt_loc=", 2);
 
-                    String currentSeed = getSeed(info);
+                String upscale = event.getOption("upscale") == null ? dcNodaiconfig.defaults[3] : event.getOption("upscale").getAsString();
 
-                    String[] splitInfo = info.split("ckpt_loc=", 2);
+                switch (upscale) {
 
-                    String finalDate = getFinalDate();
-
-                    File folder = new File("D:/customsharksd/SHARK/apps/stable_diffusion/web/generated_imgs/" + finalDate);
-                    File[] listOfFiles = folder.listFiles();
-
-                    for (File listOfFile : listOfFiles) {
-                        if (listOfFile.isFile() && listOfFile.toString().contains(currentSeed)) {
-
-                            String FileName = "D:/customsharksd/SHARK/apps/stable_diffusion/web/generated_imgs/" + finalDate + "/" + listOfFile.getName();
-                            String upscale = event.getOption("upscale") == null ? dcNodaiconfig.defaults[3] : event.getOption("upscale").getAsString();
-
-                            switch (upscale) {
-                                case "no":
-                                    FileUpload aiImage = FileUpload.fromData(new File(FileName));
-                                    eb3.setTitle("Image informations:", null);
-                                    if (splitInfo[0].length() > 1023) {
-                                        eb3.addField("", "Too long!", false);
-                                    } else {
-                                        eb3.addField("", splitInfo[0], false);
-                                    }
-                                    eb3.addField("", splitInfo[1], false);
-                                    eb3.addField("Upscaling", "If you want to upscale the generated image please use /gen mode:Upscale path:" + finalDate + "/" + listOfFile.getName() + " seed:" + currentSeed + "", false);
-                                    event.getChannel().sendMessageEmbeds(eb3.build()).queue();
-                                    eb3.clear();
-                                    event.getChannel().sendFiles(aiImage).queue();
-                                    break;
-                                case "yes":
-
-                                    event.getChannel().sendMessage("Image generated! Now upscaling...").queue();
-                                    dcNodaiUpscaler.nodaiUpscale(FileName, currentSeed);
-                                    File[] newlistOfFiles = folder.listFiles();
-
-                                    for (File newlistOfFile : newlistOfFiles) {
-                                        if (newlistOfFile.toString().contains("upscale") && newlistOfFile.toString().contains(currentSeed)) {
-                                            FileName = "D:/customsharksd/SHARK/apps/stable_diffusion/web/generated_imgs/" + finalDate + "/" + newlistOfFile.getName();
-                                            FileUpload aiImageUpscaled = FileUpload.fromData(new File(FileName));
-                                            eb3.setTitle("Image informations:", null);
-                                            if (splitInfo[0].length() > 1023) {
-                                                eb3.addField("", "Too long!", false);
-                                            } else {
-                                                eb3.addField("", splitInfo[0], false);
-                                            }
-                                            eb3.addField("", splitInfo[1], false);
-                                            event.getChannel().sendMessageEmbeds(eb3.build()).queue();
-                                            eb3.clear();
-                                            event.getChannel().sendFiles(aiImageUpscaled).queue();
-                                        }
-                                    }
-                                    break;
-                            }
+                    case "no":
+                        eb3.setTitle("Image informations:", null);
+                        if (splitInfo[0].length() > 1023) {
+                            eb3.addField("", "Too long!", false);
+                        } else {
+                            eb3.addField("", splitInfo[0], false);
                         }
+                        eb3.addField("", splitInfo[1], false);
+                        event.getChannel().sendMessageEmbeds(eb3.build()).queue();
+                        eb3.clear();
+                        sendImageToChat(event, imageData);
+                        break;
 
-                    }
+                    case "yes":
+
+                        event.getChannel().sendMessage("Image generated! Now upscaling...").queue();
+                        dcNodaiUpscaler.nodaiUpscale(event, imageData);
+
+                        break;
+
                 }
+
             }
 
             connection.disconnect();
 
         } catch (Exception e) {
         }
+    }
+
+    public static void sendImageToChat(SlashCommandInteractionEvent event, String imageData) {
+        File imageBuffered = dcNodaiMisc.convertBase64ToPNG(imageData);
+        FileUpload aiImage = FileUpload.fromData(imageBuffered);
+        event.getChannel().sendFiles(aiImage).queue();
+    }
+
+    public static String getImageData(JsonNode jsonNode) {
+        String imageData;
+        imageData = jsonNode.get("images").toString()
+                .replace("[", "")
+                .replace("]", "")
+                .replace("\"", "");
+
+        return imageData;
     }
 
     @NotNull
@@ -125,7 +110,7 @@ public class dcNodaiTxt2img extends ListenerAdapter {
     }
 
     @NotNull
-    private static String getJsonResponse(HttpURLConnection connection) throws IOException {
+    public static String getJsonResponse(HttpURLConnection connection) throws IOException {
         InputStream inputStream = connection.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         StringBuilder responseBuilder = new StringBuilder();
@@ -141,27 +126,9 @@ public class dcNodaiTxt2img extends ListenerAdapter {
     }
 
     @NotNull
-    private static String getFinalDate() {
-        long millis = System.currentTimeMillis();
-        java.sql.Date date = new java.sql.Date(millis);
-        String stringDate = date.toString();
-        String[] dateArray = stringDate.split("-", 3);
-        String finalDate = dateArray[0] + dateArray[1] + dateArray[2];
-        return finalDate;
-    }
-
-    @NotNull
     private static String getFinalPayload(SlashCommandInteractionEvent event) {
-        String aPrompt;
-        if (event.getOption("danid") != null) {
-            aPrompt = dcDanbooruAPI.getDanbooruTags(event.getOption("danid").getAsInt());
-        } else {
-            if (event.getOption("prompt") == null) {
-                aPrompt = "";
-            } else {
-                aPrompt = event.getOption("prompt").getAsString();
-            }
-        }
+
+        String aPrompt = getPromptFromSource(event);
 
         String model = event.getOption("model") == null ? dcNodaiconfig.defaults[0] : event.getOption("model").getAsString();
         String size = event.getOption("size") == null ? dcNodaiconfig.defaults[1] : event.getOption("size").getAsString();
@@ -189,6 +156,24 @@ public class dcNodaiTxt2img extends ListenerAdapter {
         String custom_lora_file = "\"custom_lora\": \"" + lora + "\"";
         String finalPayload = "{" + prompt + negative_prompt + steps + seed + height + width + cfg_scale + hf_model_id + scheduler + custom_lora_file + "}";
         return finalPayload;
+    }
+
+    @NotNull
+    private static String getPromptFromSource(SlashCommandInteractionEvent event) {
+        String aPrompt;
+
+        if (event.getOption("danid") != null) {
+            aPrompt = dcDanbooruAPI.getDanbooruTags(event.getOption("danid").getAsInt());
+        } else if (event.getOption("rdmdanid") != null && event.getOption("danid") == null) {
+            aPrompt = dcDanbooruAPI.getDanbooruTags((int) (Math.random() * 6400000));
+        } else {
+            if (event.getOption("prompt") == null) {
+                aPrompt = "";
+            } else {
+                aPrompt = event.getOption("prompt").getAsString();
+            }
+        }
+        return aPrompt;
     }
 
     @NotNull

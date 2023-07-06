@@ -2,3 +2,4 @@ dcbot/target
 dcbot/src/main/java/de/thws/cmds/dcNod/dcNodaiconfig.java
 .idea
 .git
+output.png

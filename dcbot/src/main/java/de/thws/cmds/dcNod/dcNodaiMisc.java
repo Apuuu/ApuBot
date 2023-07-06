@@ -6,6 +6,10 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -77,4 +81,27 @@ public class dcNodaiMisc {
             return null;
         }
     }
+
+    public static File convertBase64ToPNG(String base64String) {
+        try {
+
+            byte[] imageBytes = Base64.getDecoder().decode(base64String);
+
+            ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
+            BufferedImage image = ImageIO.read(bis);
+            bis.close();
+
+            File outputFile = new File("output.png");
+
+            ImageIO.write(image, "PNG", outputFile);
+
+            return outputFile;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
 }

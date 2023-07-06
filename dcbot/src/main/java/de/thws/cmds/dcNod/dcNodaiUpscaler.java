@@ -1,10 +1,12 @@
 package de.thws.cmds.dcNod;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.utils.FileUpload;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -22,7 +24,7 @@ public class dcNodaiUpscaler extends ListenerAdapter {
 
                 switch (mode) {
 
-                    case "soloupscale":
+                    /*case "soloupscale":
 
                         String FilePath = "D:/customsharksd/SHARK/apps/stable_diffusion/web/generated_imgs/" + event.getOption("path").getAsString();
                         String FileSeed = event.getOption("seed").getAsString();
@@ -52,7 +54,7 @@ public class dcNodaiUpscaler extends ListenerAdapter {
                             }
                         }
 
-                        break;
+                        break;*/
                 }
 
                 break;
@@ -62,51 +64,22 @@ public class dcNodaiUpscaler extends ListenerAdapter {
 
     }
 
-    public static void nodaiUpscale(String imagePath, String cSeed) {
-
-        //String Neg = "worst quality, low quality, multiple views, multiple legs, missing arms, missing legs, multiple panels, blurry, watermark, letterbox, text, bad anatomy,bad finger,bad hand,bad eyes,over 5 finger, wrong hand,long finger";       
-        String Neg = "";
-        String url = "http://127.0.0.1:8080/";
+    public static void nodaiUpscale(SlashCommandInteractionEvent event, String imageData) {
 
         try {
 
-            String[] base64Data = {dcNodaiMisc.imageToBase64(imagePath)};
-            String model = "stabilityai/stable-diffusion-x4-upscaler";
+            String finalPayload = JsonBuilder(imageData);
 
-            Long seedUp = Long.parseLong(cSeed);
+            HttpURLConnection connection2 = sendRequestAndReceiveResponse(finalPayload);
 
-            String prompt = "\"prompt\": \"upscale\",";
-            String negative_prompt = "\"negative_prompt\": \"" + Neg + "\",";
-            String seed = "\"seed\": " + seedUp + ",";
-            String height = "\"height\": " + 512 + ",";
-            String width = "\"width\": " + 768 + ",";
-            String cfg_scale = "\"cfg_scale\": 7.5,";
-            String init_imagesjson = "\"init_images\": [\"" + base64Data[0] + "\"],";
-            String steps = "\"steps\": " + 20 + ",";
-            String noise_level = "\"noise_level\": " + 20 + ",";
-            String hf_model_id = "\"hf_model_id\": \"" + model + "\",";
-            String scheduler = "\"sampler\": \"EulerDiscrete\"";
+            String jsonResponse = dcNodaiTxt2img.getJsonResponse(connection2);
 
-            String finalPayload = "{" + prompt + negative_prompt + seed + height + width + cfg_scale + init_imagesjson + steps + noise_level + hf_model_id + scheduler + "}";
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(jsonResponse);
 
-            String urlwhole = url + "sdapi/v1/upscaler";
-            URL endpointUrlUp = new URL(urlwhole);
+            String imageDataNew = dcNodaiTxt2img.getImageData(jsonNode);
 
-            HttpURLConnection connection2 = (HttpURLConnection) endpointUrlUp.openConnection();
-
-            connection2.setRequestMethod("POST");
-            connection2.setRequestProperty("Content-Type", "application/json");
-            connection2.setRequestProperty("Accept", "application/json");
-            connection2.setDoOutput(true);
-
-            OutputStream outputStream = connection2.getOutputStream();
-            outputStream.write(finalPayload.getBytes());
-            outputStream.flush();
-            outputStream.close();
-
-            int responseCode = connection2.getResponseCode();
-
-            System.out.println(responseCode);
+            dcNodaiTxt2img.sendImageToChat(event, imageDataNew);
 
             connection2.disconnect();
 
@@ -114,6 +87,44 @@ public class dcNodaiUpscaler extends ListenerAdapter {
             e.printStackTrace();
         }
 
+    }
+
+    @NotNull
+    private static HttpURLConnection sendRequestAndReceiveResponse(String finalPayload) throws IOException {
+        URL endpointUrlUp = new URL(dcNodaiconfig.upscalerURL);
+
+        HttpURLConnection connection2 = (HttpURLConnection) endpointUrlUp.openConnection();
+
+        connection2.setRequestMethod("POST");
+        connection2.setRequestProperty("Content-Type", "application/json");
+        connection2.setRequestProperty("Accept", "application/json");
+        connection2.setDoOutput(true);
+
+        OutputStream outputStream = connection2.getOutputStream();
+        outputStream.write(finalPayload.getBytes());
+        outputStream.flush();
+        outputStream.close();
+        return connection2;
+    }
+
+    @NotNull
+    private static String JsonBuilder(String imageData) {
+        String model = "stabilityai/stable-diffusion-x4-upscaler";
+
+        String prompt = "\"prompt\": \"upscale\",";
+        String negative_prompt = "\"negative_prompt\": \"" + dcNodaiconfig.defaultNegativePrompt + "\",";
+        String seed = "\"seed\": " + -1 + ",";
+        String height = "\"height\": " + 512 + ",";
+        String width = "\"width\": " + 768 + ",";
+        String cfg_scale = "\"cfg_scale\": 7.5,";
+        String init_imagesjson = "\"init_images\": [\"" + imageData + "\"],";
+        String steps = "\"steps\": " + 20 + ",";
+        String noise_level = "\"noise_level\": " + 20 + ",";
+        String hf_model_id = "\"hf_model_id\": \"" + model + "\",";
+        String scheduler = "\"sampler\": \"EulerDiscrete\"";
+
+        String finalPayload = "{" + prompt + negative_prompt + seed + height + width + cfg_scale + init_imagesjson + steps + noise_level + hf_model_id + scheduler + "}";
+        return finalPayload;
     }
 
 }
