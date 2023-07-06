@@ -14,36 +14,7 @@ import java.net.URL;
 
 public class dcNodaiTxt2img extends ListenerAdapter {
 
-    @Override
-    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-
-        switch (event.getName()) {
-
-            case "gen":
-
-                EmbedBuilder eb3 = new EmbedBuilder();
-                String mode = event.getOption("mode").getAsString();
-
-                switch (mode) {
-
-                    case "default":
-                        requestImage(event, eb3);
-                        break;
-
-                    case "models":
-                        dcNodaiMisc.sendModels(eb3, event);
-                        break;
-
-                    case "usage":
-                        dcNodaiMisc.sendUsage(eb3, event);
-                        break;
-                }
-                break;
-
-        }
-    }
-
-    private static void requestImage(SlashCommandInteractionEvent event, EmbedBuilder eb3) {
+    public static void requestImage(SlashCommandInteractionEvent event, EmbedBuilder eb3) {
         String finalPayload = getFinalPayload(event);
 
         dcNodaiMisc.sendToLogger(event, dcNodaiMisc.getUsername(event), finalPayload, eb3);

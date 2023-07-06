@@ -1,9 +1,7 @@
 package de.thws;
 
 import de.thws.cmds.commands;
-import de.thws.cmds.dcNod.dcNodaiTxt2img;
-import de.thws.cmds.dcNod.dcNodaiUpscaler;
-import de.thws.cmds.dcNod.dcNodaiconfig;
+import de.thws.cmds.dcNod.*;
 import de.thws.cmds.enhancementsim;
 import de.thws.cmds.msgs;
 import net.dv8tion.jda.api.JDA;
@@ -25,6 +23,8 @@ public class dcBot {
                 .addEventListeners(new enhancementsim())
                 .addEventListeners(new dcNodaiTxt2img())
                 .addEventListeners(new dcNodaiUpscaler())
+                .addEventListeners(new dcNodaiOutpainting())
+                .addEventListeners(new dcNodaiHub())
                 .setActivity(Activity.listening("Infinite loops caused by Bruh"))
                 .build();
 
@@ -46,6 +46,7 @@ public class dcBot {
                                         .addChoice("Usage", "usage")
                                         .addChoice("Models", "models")
                                         .addChoice("Upscale", "soloupscale")
+                                        .addChoice("Extend", "extend")
                         )
                         .addOptions(
                                 new OptionData(OptionType.STRING, "size", "select a valid size")
